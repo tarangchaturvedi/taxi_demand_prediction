@@ -3,7 +3,12 @@ import numpy as np
 import pandas as pd
 
 
-def data_featurization(kmeans, regions_cum):
+def data_featurization(kmeans, smoothed_frames):
+    # Making list of all the values of pickup data in every bin for a period of 3 months and storing them region-wise 
+    regions_cum = []
+    for i in range(0,40):
+        regions_cum.append(smoothed_frames['jan_2016'][4464*i:4464*(i+1)]+smoothed_frames['feb_2016'][4176*i:4176*(i+1)]+smoothed_frames['mar_2016'][4464*i:4464*(i+1)])
+
     # we take number of pickups that are happened in last 5 10min intravels
     number_of_time_stamps = 5
 
