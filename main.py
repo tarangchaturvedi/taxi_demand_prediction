@@ -1,6 +1,6 @@
 from data_featurization import data_featurization
 import dask.dataframe as dd
-from utility import datapreparation, unique_pickup_bins, initialize_kmeans, frame_smoothing, data_loading, frame_preparation
+from utility import unique_pickup_bins, initialize_kmeans, frame_smoothing, data_loading, frame_preparation
 from basline_models import baseline_models
 import pandas as pd
 from regression_models import regression_models
@@ -8,7 +8,7 @@ from regression_models import regression_models
 def main():
     months = ['jan_2015','jan_2016','feb_2016','mar_2016']
     #COLLECTING DATA
-    path = "D:\\AppliedAI_Course\\[AppliedAI]\\Module 6_ Machine Learning Real-World Case Studies\\Case study 4_Taxi demand prediction in New York City\\Notes and Resources"
+    #path = "file_path"
     initial_frames = {}
     data_loading(months, path, initial_frames)
 
