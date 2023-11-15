@@ -1,9 +1,13 @@
+import dask.dataframe as dd
 import math
 import datetime
 import time
 import numpy as np
 from sklearn.cluster import MiniBatchKMeans, KMeans
 
+def data_loading(months, path, initial_frames):
+    for month in months:
+        initial_frames[f'{month}'] = dd.read_csv(path + "\\" + f'yellow_tripdata_{month}.csv')
 
 def convert_to_unix(s):
     return time.mktime(datetime.datetime.strptime(s, "%Y-%m-%d %H:%M:%S").timetuple())
@@ -67,6 +71,20 @@ def add_pickup_bins(frame, month, year):
 
 
 # Data Preparation for the months of Jan,Feb and March 2016
+def frame_preparation(months, initial_frames, kmeans, prepared_frames, groupby_frames):
+    for month in months:
+        if 'jan' in month:
+            mnth = 1
+        elif 'feb' in month:
+            mnth = 2
+        else:
+            mnth = 3
+        if '2015' in month:
+            year = 2015
+        else:
+            year = 2016
+        prepared_frames[f'{month}'], groupby_frames[f'{month}'] = datapreparation(initial_frames[f'{month}'],kmeans,mnth,year)
+        
 def datapreparation(frame,kmeans,month_no,year_no):
     
     print ("Return with trip times..")
@@ -86,6 +104,11 @@ def datapreparation(frame,kmeans,month_no,year_no):
     final_groupby_frame = final_updated_frame[['pickup_cluster','pickup_bins','trip_distance']].groupby(['pickup_cluster','pickup_bins']).count()
     
     return final_updated_frame,final_groupby_frame
+
+###########################################
+def unique_pickup_bins(months):
+    for month in months:
+        globals()[f'{month}_unique'] = return_unq_pickup_bins(globals()[f'{month}_frame'])
 
 # Gets the unique bins where pickup values are present for each each reigion
 def return_unq_pickup_bins(frame):
@@ -171,6 +194,7 @@ def smoothing(count_values,values):
 ###############################################################################################
 
 def initialize_kmeans(frame):
+    print("initializing kmeans")
     frame = return_with_trip_times(frame)
     frame = remove_outliers(frame)
     coords = frame[['pickup_latitude', 'pickup_longitude']].values
@@ -193,3 +217,11 @@ def split_data(tsne_feature):
     test_features = [tsne_feature[i * total_timestamps + train_size : (i + 1) * total_timestamps] for i in range(40)]
     return train_features, test_features
 #########################################
+
+def frame_smoothing(months, smoothed_frames):
+    for month in months:
+        if month == 'jan_2015':
+            globals()[f'{month}_fill'] = fill_missing(globals()[f'{month}_groupby']['trip_distance'].values.compute(), globals()[f'{month}_unique'])
+            smoothed_frames[f'{month}'] = smoothing(globals()[f'{month}_groupby']['trip_distance'].values.compute(), globals()[f'{month}_unique'])
+        else:
+            smoothed_frames[f'{month}'] = fill_missing(globals()[f'{month}_groupby']['trip_distance'].values.compute(), globals()[f'{month}_unique'])
